@@ -13,6 +13,12 @@ class Property(models.Model):
     available = fields.Boolean(string='Available', default=True, index=True)    
     agent_id = fields.Many2one('res.users', string='Sales Person')
 
+    currency_id = fields.Many2one(
+    'res.currency', 
+    string='Currency', 
+    default=lambda self: self.env.company.currency_id
+)
+
     property_image = fields.Binary(string="Property Image")
     lease_ids = fields.One2many(
         'real_estate.lease',
