@@ -40,6 +40,12 @@
                         </group>
 
                     </group>
+                    <group string= "Dates">
+                    <field name="preferred_date"/> 
+                    <field name="scheduled_date"/> 
+                    <field name="completion_date"/> 
+                    
+                    </group>
                     
                     <group>
                         <group>
