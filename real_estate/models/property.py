@@ -18,6 +18,11 @@ class Property(models.Model):
     string='Currency', 
     default=lambda self: self.env.company.currency_id
 )
+    payment_ids = fields.One2many(
+        'lease.payment',
+        'property_id',
+        string='Payments'
+    )
 
     property_image = fields.Binary(string="Property Image")
     lease_ids = fields.One2many(
@@ -114,6 +119,13 @@ class Property(models.Model):
             'default_property_id': self.id,
         }
         return action
+    
+    def action_export_excel(self):
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/real_estate/property/excel_export/{self.id}',
+            'target': 'self',
+        }
     
     
             

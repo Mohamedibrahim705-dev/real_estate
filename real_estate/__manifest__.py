@@ -16,6 +16,7 @@ Long description of module's purpose
     # for the full list
     'category': 'Uncategorized',
     'version': '0.1',
+    'application': True,
 
     # any module necessary for this one to work correctly
     'depends': ['base', 'crm', 'portal', 'website'],
@@ -41,6 +42,8 @@ Long description of module's purpose
         'views/lease_views.xml',
         'views/res_partner.xml',
         'wizard/tenant_wizard.xml',
+        'wizard/rent_roll_wizard_views.xml',
+        'wizard/maintenance_report_wizard.xml',
         'views/crm_lead_view.xml',
         'views/menu.xml',
 

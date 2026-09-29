@@ -3,6 +3,7 @@
     <!-- Main Menu (Top Level) -->
     <menuitem id="menu_real_estate_root"
               name="Real Estate"
+              groups="real_estate.group_property_manager,real_estate.group_maintenance"
               sequence="10"/>
 
     <!-- Properties Menu -->
@@ -28,7 +29,7 @@
    <menuitem id="menu_lease"
               name="Leases"
               parent="menu_real_estate_root"
-              action="action_lease"
+              action="lease_action"
               sequence="40"/>
     <!-- Payments Menu -->
     <menuitem id="menu_payment"
@@ -36,4 +37,25 @@
                   parent="menu_real_estate_root"
                   action="action_payment"
                   sequence="50"/>
+
+
+            <!-- Reports Menu -->
+    <menuitem id="menu_real_estate_reports"
+              name="Reporting"
+              parent="menu_real_estate_root"
+              sequence="60"/>
+
+
+                  <!-- Add to menu -->
+    <menuitem id="menu_rent_roll_report"
+              name="Rent Roll Report"
+              parent="menu_real_estate_reports"
+              action="action_rent_roll_wizard"
+              sequence="10"/>
+
+              <menuitem id="menu_maintenance_report"
+                        name="Maintenance Report"
+                        parent="menu_real_estate_reports"
+                        action="action_maintenance_report_wizard"
+                        sequence="20"/>              
 </odoo>

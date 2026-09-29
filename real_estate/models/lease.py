@@ -1,109 +1,187 @@
-from datetime import timedelta 
-from odoo import models, fields, api
+
+from dateutil.relativedelta import relativedelta
+from datetime import timedelta
+
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.exceptions import ValidationError
+
 
 class Lease(models.Model):
     _name = 'real_estate.lease'
     _description = 'Property Lease Agreement'
-    
-    name = fields.Char(string='Lease Reference', required=True)
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+
+    # =========================================================
+    # Core Fields
+    # =========================================================
+
+    name = fields.Char(
+        string='Lease Reference',
+        required=True,
+        tracking=True,
+        default=lambda self: self.env['ir.sequence'].next_by_code(
+            'real_estate.lease'
+        ) or 'New',
+    )
+
     property_id = fields.Many2one(
         'real_estate.property',
         string='Property',
         required=True,
-        ondelete='cascade',  # If property deleted, delete lease too
-        index=True
+        ondelete='cascade',
+        index=True,
     )
-    lease_image = fields.Binary(string="Property Image")
-    user_id = fields.Many2one('res.users', string='Related User', index=True)
+
     tenant_id = fields.Many2one(
         'real_estate.tenant',
         string='Tenant',
         required=True,
         ondelete='cascade',
-        index=True
+        index=True,
     )
-    next_electric_recharge = fields.Date(string='Electricity Bill Date')
 
-    start_date = fields.Date(string='Start Date', required=True)
-    end_date = fields.Date(string='End Date', required=True)
-    monthly_rent = fields.Float(string='Monthly Rent', required=True)
-    deposit_paid = fields.Float(string='Deposit Paid')
-    notes = fields.Text(string='Notes')
-    state = fields.Selection([
-        ('draft', 'Draft'),
-        ('active', 'Active'),
-        ('at_risk', 'At Risk'),
-        ('expired', 'Expired'),
-        ('cancelled', 'Cancelled'),
-    ], string='Status', default='draft', required=True)
-    maintenance_ids = fields.One2many(
+    start_date = fields.Date(
+        string='Start Date',
+        required=True,
+    )
+
+    end_date = fields.Date(
+        string='End Date',
+        required=True,
+    )
+
+    monthly_rent = fields.Float(
+        string='Monthly Rent',
+        required=True,
+    )
+
+    deposit_paid = fields.Float(
+        string='Deposit Paid',
+    )
+
+    user_id = fields.Many2one(
+        'res.users',
+        string='User',
+        default=lambda self: self.env.user,
+        index=True,
+    )
+
+    state = fields.Selection(
+        [
+            ('draft', 'Draft'),
+            ('active', 'Active'),
+            ('at_risk', 'At Risk'),
+            ('expired', 'Expired'),
+            ('cancelled', 'Cancelled'),
+        ],
+        string='Status',
+        default='draft',
+        required=True,
+        tracking=True,
+    )
+    
+    
+    next_payment_date = fields.Date(string='Last Reminder Sent')
+    last_reminder_sent = fields.Date(string='Last Reminder Sent', readonly=True)
+
+
+    # =========================================================
+    # Maintenance
+    # =========================================================
+
+    maintenance_request_ids = fields.One2many(
         'maintenance.request',
         'lease_id',
         string='Maintenance Requests',
     )
-    tenant_age= fields.Integer(string='Tenant Age', compute='_compute_tenant_age', store=True)
-    duration_months = fields.Integer(string='Duration (Months)', compute='_compute_duration', store=True)
-    is_active = fields.Boolean(string='Currently Active', compute='_compute_is_active')
 
-    def mark_as_active(self):
-        """Mark lease as active"""
-        if not self.env.user.has_group('real_estate.group_lease_manager'):
-            raise UserError("Only users with the 'Lease Manager' role can edit leases.")
+    maintenance_count = fields.Integer(
+        string='Maintenance Requests',
+        compute='_compute_maintenance_count',
+        store=True,
+    )
+
+    plumbing_cost = fields.Float(
+        string='Plumbing Cost',
+        compute='_compute_maintenance_costs',
+        store=True,
+    )
+
+    electrical_cost = fields.Float(
+        string='Electrical Cost',
+        compute='_compute_maintenance_costs',
+        store=True,
+    )
+
+    air_condition_cost = fields.Float(
+        string='Air Condition Cost',
+        compute='_compute_maintenance_costs',
+        store=True,
+    )
+
+    appliance_cost = fields.Float(
+        string='Appliance Cost',
+        compute='_compute_maintenance_costs',
+        store=True,
+    )
+
+    other_cost = fields.Float(
+        string='Other Cost',
+        compute='_compute_maintenance_costs',
+        store=True,
+    )
+
+    total_cost = fields.Float(
+        string='Total Maintenance Cost',
+        compute='_compute_maintenance_costs',
+        store=True,
+    )
+
+    # =========================================================
+    # Lease Calculations
+    # =========================================================
+
+    duration_months = fields.Integer(
+        string='Duration (Months)',
+        compute='_compute_duration_months',
+        store=True,
+    )
+
+    is_active = fields.Boolean(
+        string='Currently Active',
+        compute='_compute_is_active',
+         
+    )
+
+    next_electric_recharge = fields.Date(
+        string='Next Electric Recharge',
+        compute='_compute_next_electric_recharge',
+        store=True,
+    )
+
+    # =========================================================
+    # Compute Methods
+    # =========================================================
+
+    @api.depends('maintenance_request_ids')
+    def _compute_maintenance_count(self):
         for record in self:
-            record.write({'state': 'active'})
-            
-    def mark_set_back_to_draft(self):
-        """Mark lease as draft"""
-        for record in self:
-            record.write({'state': 'draft'})
+            record.maintenance_count = len(record.maintenance_request_ids)
 
-    def copy(self, default=None):
-        """Prevent duplicating lease records."""
-        raise UserError("You cant copy a lease")
-
-    # def copy(self, default=None):
-    #     """Old copy behavior kept for reference."""
-    #     return super(Lease, self).copy(default=default)
-
-    @api.model
-    def create(self, vals):
-        """Override create to generate lease reference"""
-        vals['name'] = self.env['ir.sequence'].next_by_code('real_estate.lease')
-        return super(Lease, self).create(vals)
-    
-
-    # def write(self, vals):
-    #    if not self.env.user.has_group('real_estate.group_lease_manager'):
-    #     raise UserError("Only users with the 'Lease Manager' role can edit leases.")
-    #    return super(Lease, self).write(vals)
-    
-    def unlink(self):
-       if not self.env.user.has_group('real_estate.group_lease_manager'):
-        raise UserError("Only users with the 'Lease Manager' role can delete leases.")
-       return super(Lease, self).unlink()
-
-    def action_open_related_maintenance(self):
-        self.ensure_one()
-        action = self.env["ir.actions.act_window"]._for_xml_id("real_estate.action_maintenance")
-        action['views'] = [
-            
-            (self.env.ref('real_estate.view_maintenance_form').id, 'form'),
-        ]
-        action['domain'] = [('lease_id', '=', self.id)]
-        action['context'] = {
-            **self.env.context,
-            'default_lease_id': self.id,
-        }
-        return action
     @api.depends('start_date', 'end_date')
-    def _compute_duration(self):
-        """Calculate lease duration in months"""
+    def _compute_duration_months(self):
+        """Calculate lease duration in months."""
         for record in self:
             if record.start_date and record.end_date:
-                delta = record.end_date - record.start_date
-                record.duration_months = int(delta.days / 30)
+                delta = relativedelta(
+                    record.end_date,
+                    record.start_date,
+                )
+
+                record.duration_months = (
+                    delta.years * 12 + delta.months
+                )
             else:
                 record.duration_months = 0
 
@@ -117,138 +195,164 @@ class Lease(models.Model):
             else:
                 record.is_active = False
 
-    @api.depends('tenant_id.date_of_birth')
-    def _compute_tenant_age(self):
-        """Calculate tenant age based on date of birth"""
-        today = fields.Date.today()
+    @api.depends('start_date')
+    def _compute_next_electric_recharge(self):
         for record in self:
-            if record.tenant_id and record.tenant_id.date_of_birth:
-                dob = record.tenant_id.date_of_birth
-                age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
-                record.tenant_age = age
+            if record.start_date:
+                record.next_electric_recharge = (
+                    record.start_date + relativedelta(months=1)
+                )
             else:
-                record.tenant_age = 0    
+                record.next_electric_recharge = False
 
     @api.onchange('property_id')
     def _onchange_property_id(self):
-        """Set default price when property is selected and validate availability"""
-        if self.property_id and not self.property_id.available:
-            raise ValidationError("The selected property is not available.")
-        if self.property_id and self.property_id.price:
-            self.monthly_rent = self.property_id.price 
-            self.deposit_paid = self.property_id.price * 0.1 
-    
+        """Set the monthly rent from the selected property and validate availability."""
+        if not self.property_id:
+            return
 
-    @api.onchange('start_date')          
-    def _onchange_next_electric_recharge(self):
-        """Update electricity bill date"""
-        if self.start_date :
-            self.next_electric_recharge = self.start_date + timedelta(days=30)
+        if not self.property_id.available:
+            raise ValidationError(
+                "The selected property is not available."
+            )
 
-    def action_submit_request(self):
-        """Create maintenance request and notify manager"""
+        self.monthly_rent = self.property_id.price or 0.0
+        self.deposit_paid = self.property_id.price*0.1
+
+    # =========================================================
+    # Lease Actions
+    # =========================================================
+
+    def activate_lease(self):
+        for record in self:
+            record.write({
+                'state': 'active',
+            })
+
+    def draft_lease(self):
+        for record in self:
+            record.write({
+                'state': 'draft',
+            })
+
+    def cancel_lease(self):
+        for record in self:
+            record.write({
+                'state': 'cancelled',
+            })
+
+    # =========================================================
+    # Maintenance Actions
+    # =========================================================
+
+    def action_view_maintenance(self):
         self.ensure_one()
-        
-        # 1. Create maintenance.request record
-        maintenance_request = self.env['maintenance.request'].create({
-            'property_id': self.property_id.id,
-            'lease_id': self.id,
-            'issue_type': 'electrical',  # Default issue type for this example
-            'description': 'Maintenance request created from lease form.',
-            'urgency': 'medium',  # Default urgency for this example
-            'preferred_date': self.next_electric_recharge,
-            'tenant_phone': self.tenant_id.phone ,
-            'state': 'submitted',
-        })
+
         return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': 'Request Submitted',
-                'message': 'Your maintenance request has been submitted successfully and the manager has been notified.',
-                'type': 'success',
-                'sticky': False,
-                'next': {'type': 'ir.actions.act_window_close'},
+            'type': 'ir.actions.act_window',
+            'name': 'Maintenance Requests',
+            'res_model': 'maintenance.request',
+            'view_mode': 'tree,form',
+            'domain': [
+                ('lease_id', '=', self.id),
+            ],
+            'context': {
+                'default_lease_id': self.id,
+                'default_tenant_id': self.tenant_id.id,
+                'default_property_id': self.property_id.id,
             },
         }
 
-    #calculate total cost of maintenance requests for this lease
-    maintenance_ids= fields.One2many(
-        'maintenance.request',
-        'lease_id',
-        string='Maintenance Requests',
-    )
+    def action_create_maintenance(self):
+        self.ensure_one()
 
-    total_cost = fields.Float(compute='_compute_total_cost', string='Total Cost')
-    plumbing_cost = fields.Float(string='Plumbing Cost')
-    electrical_cost = fields.Float(string='Electrical Cost')
-    air_condition_cost = fields.Float(string='Air Condition Cost')
-    appliance_cost = fields.Float(string='Appliance Cost')
-    other_cost = fields.Float(string='Other Cost')
-   
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Create Maintenance Request',
+            'res_model': 'maintenance.request.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_lease_id': self.id,
+                'default_tenant_id': self.tenant_id.id,
+                'default_property_id': self.property_id.id,
+                'default_tenant_phone': (
+                    self.tenant_id.mobile or self.tenant_id.phone
+                ),
+                'default_assigned_to': self.user_id.id,
+            },
+        }
+
+    # =========================================================
+    # Create / Copy / Delete
+    # =========================================================
+
+    # @api.model_create_multi
+    # def create(self, vals_list):
+    #     sequence = self.env['ir.sequence']
+
+    #     for vals in vals_list:
+    #         if not vals.get('name') or vals.get('name') == 'New':
+    #             vals['name'] = (
+    #                 sequence.next_by_code('real_estate.lease')
+    #                 or 'New'
+    #             )
+
+    #     return super().create(vals_list)
+
+    def copy(self, default=None):
+        default = dict(default or {})
+
+        default['name'] = (
+            self.env['ir.sequence'].next_by_code(
+                'real_estate.lease'
+            )
+            or 'New'
+        )
+
+        return super().copy(default)
+
+    def unlink(self):
+        if not self.env.user.has_group(
+            'real_estate.group_lease_manager'
+        ):
+            raise UserError(
+                _('Only Lease Managers can delete leases.')
+            )
+
+        return super().unlink()
 
     @api.depends(
-        'plumbing_cost',
-        'electrical_cost',
-        'air_condition_cost',
-        'appliance_cost',
-        'other_cost',
+        'maintenance_request_ids.actual_cost',
+        'maintenance_request_ids.issue_type',
     )
-    def _compute_total_cost(self):
-        for lease in self:
-            lease.total_cost = sum((
-                lease.plumbing_cost,
-                lease.electrical_cost,
-                lease.air_condition_cost,
-                lease.appliance_cost,
-                lease.other_cost,
-            ))
-
-              # 1
-            #lease.total_cost = sum(maintenance.actual_cost for maintenance in lease.maintenance_ids)
-
-            # 2
-            # lease.total_cost = 0
-            # total_cost = 0
-            # for maintenance in lease.maintenance_ids:
-            #     if maintenance.actual_cost:
-            #         total_cost += maintenance.actual_cost
-            # lease.total_cost = total_cost   
-
-            # 3
-            #lease_maintenance_ids = self.env['maintenance.request'].search([('lease_id', '=', lease.id)])  
-            #lease.total_cost = 0
-            #for maintenance in lease_maintenance_ids:
-                #if maintenance.actual_cost:
-                    #lease.total_cost += maintenance.actual_cost
-
-    payment_ids= fields.One2many('lease.payment','lease_id')
-    cash_total = fields.Float(string='Cash Total', compute='_compute_payment_method_costs', store=True)
-    check_total = fields.Float(string='Check Total', compute='_compute_payment_method_costs', store=True)
-    bank_transfer_total = fields.Float(string='Bank Transfer Total', compute='_compute_payment_method_costs', store=True)
-    credit_card_total = fields.Float(string='Credit Card Total', compute='_compute_payment_method_costs', store=True)
-    other_total = fields.Float(string='Other Total', compute='_compute_payment_method_costs', store=True)
-    payment_method_total = fields.Float(string='Payment Method Total', compute='_compute_payment_method_costs', store=True)
-
-    @api.depends('payment_ids.amount', 'payment_ids.payment_method')
-    def _compute_payment_method_costs(self):
+    def _compute_maintenance_costs(self):
         for record in self:
-            payment_method_totals = {
-                method: sum(
-                    record.env['lease.payment'].filtered(
-                        lambda payment: payment.payment_method == method
-                    ).mapped('amount')
-                )
-                for method in ['cash', 'check', 'bank_transfer', 'credit_card', 'other']
+            costs = {
+                'plumbing': 0.0,
+                'electrical': 0.0,
+                'air_condition': 0.0,
+                'appliance': 0.0,
+                'other': 0.0,
             }
 
-            record.cash_total = payment_method_totals['cash']
-            record.check_total = payment_method_totals['check']
-            record.bank_transfer_total = payment_method_totals['bank_transfer']
-            record.credit_card_total = payment_method_totals['credit_card']
-            record.other_total = payment_method_totals['other']
-            record.payment_method_total = sum(payment_method_totals.values())
+            for maintenance in record.maintenance_request_ids:
+                issue_type = maintenance.issue_type
 
+                if issue_type:
+                    costs[issue_type] = (
+                        costs.get(issue_type, 0.0)
+                        + maintenance.actual_cost
+                    )
+
+            record.plumbing_cost = costs['plumbing']
+            record.electrical_cost = costs['electrical']
+            record.air_condition_cost = costs['air_condition']
+            record.appliance_cost = costs['appliance']
+            record.other_cost = costs['other']
+            record.total_cost = sum(costs.values())
+            
+                
     def _cron_auto_expire_leases(self):
         """Scheduled action - expire leases whose end date has passed"""
         today = fields.Date.today()
@@ -257,10 +361,9 @@ class Lease(models.Model):
         ])
         for lease in expired_leases:
             lease.write({'state': 'expired'})
-
-
-
-         # === VALIDATION ===
+            
+            
+        # === VALIDATION ===
     @api.constrains('start_date', 'end_date')
     def _check_dates(self):
         """Ensure end date is after start date"""
@@ -268,15 +371,16 @@ class Lease(models.Model):
             if record.start_date and record.end_date:
                 if record.end_date <= record.start_date:
                     raise ValidationError("End date must be after start date")
-
-    _sql_constraints = [
-        ('email_unique', 'UNIQUE(email)', 'Email must be unique! This email is already registered.'),
-    ]       
-                    
-############## Mail ################
-    next_payment_date = fields.Date(string='Next Payment Date', index=True)
-    last_reminder_sent = fields.Date(string='Last Reminder Sent', readonly=True)
-
+    
+    
+    @api.constrains('deposit_paid','monthly_rent')
+    def _check_price(self):
+        for record in self:
+            if record.deposit_paid and record.monthly_rent:
+                if record.deposit_paid > record.monthly_rent:
+                    raise ValidationError("Deposit can not be grater than price ")
+                
+                
     def send_reminder_email(self):
         template_xml_id = 'real_estate.email_template_payment_upcoming'
         if not template_xml_id:
@@ -292,17 +396,16 @@ class Lease(models.Model):
                 continue
             template.send_mail(lease.id, force_send=True)
             lease.last_reminder_sent = fields.Date.today()
+            
+            
+    def _cron_send_email(self):
+        tomorrow = fields.Date.today() + timedelta(days=1)
 
-    @api.model
-    def _cron_send_payment_reminders(self):
-        """Scheduled action - remind tenants whose next payment is due tomorrow"""
-        tomorrow = fields.Date.context_today(self) + timedelta(days=1)
         leases = self.search([
             ('next_payment_date', '=', tomorrow),
-            ('state', 'in', ['active', 'at_risk']),
-            ('tenant_id.email','!=',False)
+            ('state','=','active')
         ])
         leases.send_reminder_email()
-
-
-            
+     
+        
+    
