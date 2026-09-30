@@ -95,6 +95,8 @@
                 <separator/>
                 <filter string="Active" name="active" domain="[('active', '=', True)]"/>
                 <filter string="Inactive" name="inactive" domain="[('active', '=', False)]"/>
+                <filter string="Created By API" name="created_by_api" domain="[('created_by_api', '=', True)]"/>
+
                 <separator/>
                 <group expand="0" string="Group By">
                     <filter string="Age Category" name="group_by_age_category" context="{'group_by': 'age_category'}"/>

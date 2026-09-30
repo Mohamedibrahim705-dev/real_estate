@@ -24,6 +24,7 @@ class Tenant(models.Model):
         ('A', '1-20'),
         ('B', '21-40'),
         ('C', '41-60')],string='Age Category')
+    created_by_api = fields.Boolean(string='Created by API', default=False)
 
     lease_ids = fields.One2many(
         'real_estate.lease',
