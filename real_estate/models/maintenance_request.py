@@ -5,7 +5,7 @@ class MaintenanceRequest(models.Model):
     _name = 'maintenance.request'
     _description = 'Property Maintenance Request'
      # _inherit = ['mail.thread', 'mail.activity.mixin']
-     
+
     name = fields.Char()
     lease_id = fields.Many2one('real_estate.lease')
     assigned_to = fields.Many2one(
@@ -48,13 +48,13 @@ class MaintenanceRequest(models.Model):
         Finds requests with high or emergency urgency scheduled for tomorrow and
         can trigger notifications, change state, or create activities."""
         tomorrow = fields.Date.today() + timedelta(days=1)
-        
+
         high_urgency_requests = self.search([
             ('urgency', 'in', ['high', 'emergency']),
             ('scheduled_date', '=', tomorrow),
             ('state', 'in', ['draft', 'in_progress']),
         ])
-        
+
         for request in high_urgency_requests:
             if request.assigned_to:
                 self.env['mail.activity'].create({
@@ -65,7 +65,7 @@ class MaintenanceRequest(models.Model):
                     'user_id': request.assigned_to.id,
                     'date_deadline': tomorrow,
                 })
-            
+
             if request.tenant_id:
                 self.env['mail.activity'].create({
                     'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
@@ -75,9 +75,9 @@ class MaintenanceRequest(models.Model):
                     'user_id': request.tenant_id.user_id.id if request.tenant_id.user_id else self.env.user.id,
                     'date_deadline': tomorrow,
                 })
-        
+
         return True
-    
+
     def send_reminder_email(self):
      template_xml_id = "real_estate.email_template_maintenance"
      if not template_xml_id:

@@ -102,7 +102,7 @@ class RealEstateController(http.Controller):
 
         row = 0
         worksheet.merge_range(row, 0, row, 9, f'PROPERTY REPORT  |  {property_obj.name}', title_format)
-        worksheet.set_row(row, 34) 
+        worksheet.set_row(row, 34)
         row += 2
 
         worksheet.merge_range(row, 0, row, 9, 'PROPERTY OVERVIEW', section_format)
@@ -181,7 +181,7 @@ class RealEstateController(http.Controller):
         payment_header_row = row
         row += 1
         if request.env.user.has_group('real_estate.group_property_manager'):
-            
+
             if payments:
                 for index, payment in enumerate(payments):
                     row_format = alternate_data_format if index % 2 else data_format

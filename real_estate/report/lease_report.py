@@ -24,14 +24,14 @@ class LeaseReportSummary(models.AbstractModel):
             ])
             maintenance_costs[lease.id] = sum(costs.mapped('actual_cost'))
             total_actual_costs[lease.id] = sum(lease.maintenance_ids.mapped('actual_cost'))
-            
+
         payment_totals = {lease.id: 0.0 for lease in leases}
         payments = self.env['lease.payment'].search([
             ('lease_id', 'in', leases.ids),
         ])
         for payment in payments:
             payment_totals[payment.lease_id.id] += payment.total_amount
-        
+
         return {
             'doc_ids': docids,
             'doc_model': 'real_estate.lease',

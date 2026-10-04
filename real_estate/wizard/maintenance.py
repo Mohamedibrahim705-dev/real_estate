@@ -3,10 +3,10 @@ from odoo import models, fields, api
 class MaintenanceRequestWizard(models.TransientModel):
     _name = 'maintenance.request.wizard'
     _description = 'Maintenance Request Wizard'
-    
+
     lease_id = fields.Many2one('real_estate.lease', required=True)
     property_id = fields.Many2one('real_estate.property', related='lease_id.property_id', readonly=True)
-    
+
     issue_type = fields.Selection([
         ('plumbing', 'Plumbing'),
         ('electrical', 'Electrical'),
@@ -14,7 +14,7 @@ class MaintenanceRequestWizard(models.TransientModel):
         ('appliance', 'Appliance'),
         ('other', 'Other')
     ], required=True)
-    
+
     description = fields.Text(required=True)
     urgency = fields.Selection([
         ('low', 'Low'),
@@ -22,14 +22,14 @@ class MaintenanceRequestWizard(models.TransientModel):
         ('high', 'High'),
         ('emergency', 'Emergency')
     ], default='medium', required=True)
-    
+
     preferred_date = fields.Date()
     tenant_phone = fields.Char()
-    
+
     def action_submit_request(self):
         """Create maintenance request and notify manager"""
         self.ensure_one()
-        
+
         # 1. Create maintenance.request record
         maintenance_request = self.env['maintenance.request'].create({
             'property_id': self.property_id.id,
@@ -41,7 +41,7 @@ class MaintenanceRequestWizard(models.TransientModel):
             'tenant_phone': self.tenant_phone,
             'state': 'submitted',
         })
-        
+
         # 2. Send notification to property manager (Agent)
         # if self.property_id.agent_id:
         #     maintenance_request.activity_schedule(
@@ -50,7 +50,7 @@ class MaintenanceRequestWizard(models.TransientModel):
         #         summary=f"New {self.issue_type.capitalize()} Maintenance Request",
         #         note=f"Urgency: {self.urgency}\nDescription: {self.description}"
         #     )
-        
+
         # 3. Return action to close wizard and show confirmation
         return {
             'type': 'ir.actions.client',

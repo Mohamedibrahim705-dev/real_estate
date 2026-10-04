@@ -13,8 +13,8 @@
                 <field name="property_id"/>
                 <field name="scheduled_date" string="Electricity Bill Date" readonly="1"/>
                 <field name="issue_type"/>
-                <field name="urgency"/> 
-        
+                <field name="urgency"/>
+
             </tree>
         </field>
     </record>
@@ -36,24 +36,24 @@
                 <field name= "actual_cost"/>
                 <field name="assigned_to"/>
                 <field name="tenant_id"/>
-                <field name="property_id"/> 
+                <field name="property_id"/>
                         </group>
 
                     </group>
                     <group string= "Dates">
-                    <field name="preferred_date"/> 
-                    <field name="scheduled_date"/> 
-                    <field name="completion_date"/> 
-                    
+                    <field name="preferred_date"/>
+                    <field name="scheduled_date"/>
+                    <field name="completion_date"/>
+
                     </group>
-                    
+
                     <group>
                         <group>
-             
+
                 <field name="issue_type"/>
-                <field name="urgency"/> 
-                         
-                           
+                <field name="urgency"/>
+
+
                         </group>
                     </group>
                     <notebook>

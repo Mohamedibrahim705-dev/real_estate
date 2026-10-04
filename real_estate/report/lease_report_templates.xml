@@ -9,7 +9,7 @@
                         <h2> Lease Summary: <span t-field="o.name"/></h2>
 
                         </div>
-                        
+
                         <!-- Lease Details -->
                         <div class="row mt-4">
                             <div class="col-6">
@@ -48,7 +48,7 @@
                                 <span t-field="o.end_date"/>
                             </div>
                         </div>
- 
+
                         <!-- Lease Financials -->
                         <div class="row mt-4">
                             <div class="col-12">

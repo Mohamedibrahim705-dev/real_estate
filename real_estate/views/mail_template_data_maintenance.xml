@@ -10,7 +10,7 @@
             <div style="margin: 0px; padding: 0px;">
                 <p style="margin: 0px; padding: 0px; font-size: 13px;">
                     Dear <t t-out="object.assigned_to.name"/>,<br/><br/>
-                    This is a friendly reminder that your maintenance request for <strong><t t-out="object.property_id.name"/></strong> 
+                    This is a friendly reminder that your maintenance request for <strong><t t-out="object.property_id.name"/></strong>
                     is due on <strong><t t-out="object.scheduled_date"/></strong>.<br/><br/>
                     Actual Cost: <strong><t t-out="object.actual_cost"/></strong><br/><br/>
                     Please ensure the work is completed by the due date.<br/><br/>

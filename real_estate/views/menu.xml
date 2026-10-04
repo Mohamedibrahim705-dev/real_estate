@@ -57,5 +57,5 @@
                         name="Maintenance Report"
                         parent="menu_real_estate_reports"
                         action="action_maintenance_report_wizard"
-                        sequence="20"/>              
+                        sequence="20"/>
 </odoo>

@@ -72,10 +72,10 @@
                         string="Send Email"
                         type="object"
                         class="oe_highlight"
-                         
+
                     />
 
-                
+
 
                     <field
                         name="state"

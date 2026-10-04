@@ -80,8 +80,8 @@ class Lease(models.Model):
         required=True,
         tracking=True,
     )
-    
-    
+
+
     next_payment_date = fields.Date(string='Last Reminder Sent')
     last_reminder_sent = fields.Date(string='Last Reminder Sent', readonly=True)
 
@@ -151,7 +151,7 @@ class Lease(models.Model):
     is_active = fields.Boolean(
         string='Currently Active',
         compute='_compute_is_active',
-         
+
     )
 
     next_electric_recharge = fields.Date(
@@ -351,8 +351,8 @@ class Lease(models.Model):
             record.appliance_cost = costs['appliance']
             record.other_cost = costs['other']
             record.total_cost = sum(costs.values())
-            
-                
+
+
     def _cron_auto_expire_leases(self):
         """Scheduled action - expire leases whose end date has passed"""
         today = fields.Date.today()
@@ -361,8 +361,8 @@ class Lease(models.Model):
         ])
         for lease in expired_leases:
             lease.write({'state': 'expired'})
-            
-            
+
+
         # === VALIDATION ===
     @api.constrains('start_date', 'end_date')
     def _check_dates(self):
@@ -371,21 +371,21 @@ class Lease(models.Model):
             if record.start_date and record.end_date:
                 if record.end_date <= record.start_date:
                     raise ValidationError("End date must be after start date")
-    
-    
+
+
     @api.constrains('deposit_paid','monthly_rent')
     def _check_price(self):
         for record in self:
             if record.deposit_paid and record.monthly_rent:
                 if record.deposit_paid > record.monthly_rent:
                     raise ValidationError("Deposit can not be grater than price ")
-                
-                
+
+
     def send_reminder_email(self):
         template_xml_id = 'real_estate.email_template_payment_upcoming'
         if not template_xml_id:
             return
-            
+
         template = self.env.ref(template_xml_id, raise_if_not_found=False)
         if not template:
             return
@@ -396,8 +396,8 @@ class Lease(models.Model):
                 continue
             template.send_mail(lease.id, force_send=True)
             lease.last_reminder_sent = fields.Date.today()
-            
-            
+
+
     def _cron_send_email(self):
         tomorrow = fields.Date.today() + timedelta(days=1)
 
@@ -406,6 +406,6 @@ class Lease(models.Model):
             ('state','=','active')
         ])
         leases.send_reminder_email()
-     
-        
-    
+
+
+

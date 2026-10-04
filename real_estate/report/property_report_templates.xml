@@ -7,7 +7,7 @@
                 <t t-call="web.external_layout">
                     <div class="page">
                         <h2>Property Summary: <span t-field="o.name"/></h2>
-                        
+
                         <!-- Property Details -->
                         <div class="row mt-4">
                             <div class="col-6">
@@ -45,9 +45,9 @@
                                 <span t-esc="maintenance_costs.get(o.id, 0.0)" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
                             </div>
                         </div>
- 
+
                         <!-- Pricing -->
-                        
+
                         <div class="row mt-4">
                             <div class="col-12">
                                 <h4>Pricing Information</h4>
@@ -55,14 +55,14 @@
                                     <tr>
                                         <td><strong>Monthly Rent:</strong></td>
                                         <td class="text-end">
-                                            <span t-field="o.price" 
+                                            <span t-field="o.price"
                                                   t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td><strong>Security Deposit:</strong></td>
                                         <td class="text-end">
-                                              <span t-field="o.deposit" 
+                                              <span t-field="o.deposit"
                                                   t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
                                         </td>
                                     </tr>
@@ -93,7 +93,7 @@
                                             <tr>
                                                 <td><strong>Monthly Rent:</strong></td>
                                                 <td>
-                                                    <span t-field="active_lease.monthly_rent" 
+                                                    <span t-field="active_lease.monthly_rent"
                                                             t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
                                                 </td>
                                             </tr>

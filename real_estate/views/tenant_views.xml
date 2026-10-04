@@ -9,14 +9,14 @@
                 <field name="name"/>
                 <field name="email"/>
                 <field name="phone"/>
-                <field name="mobile"/> 
+                <field name="mobile"/>
                 <field name="city"/>
-                <field name="date_joined"/> 
-                <field name="date_of_birth"/> 
+                <field name="date_joined"/>
+                <field name="date_of_birth"/>
                 <field name="age_category"/>
                 <field name="user_id"/>
-             
-        
+
+
             </tree>
         </field>
     </record>
@@ -27,10 +27,10 @@
         <field name="arch" type="xml">
             <form string="Tenant">
             <header>
-            <button name="update_notes"  groups="real_estate.group_tenant_manager" string="Update Notes" type="object" class="oe_highlight"/> 
-             <button name="update_Crm_Lead_Notes"  groups="real_estate.group_tenant" string="Update CRM Lead Notes" type="object" class="oe_highlight"/> 
-             <button name="update_Crm_Lead_website" string="Update CRM Lead Website" type="object" class="oe_highlight"/>  
-             <button name="crm_change_to_email" string="Change to CRM Lead Email" type="object" class="oe_highlight"/> 
+            <button name="update_notes"  groups="real_estate.group_tenant_manager" string="Update Notes" type="object" class="oe_highlight"/>
+             <button name="update_Crm_Lead_Notes"  groups="real_estate.group_tenant" string="Update CRM Lead Notes" type="object" class="oe_highlight"/>
+             <button name="update_Crm_Lead_website" string="Update CRM Lead Website" type="object" class="oe_highlight"/>
+             <button name="crm_change_to_email" string="Change to CRM Lead Email" type="object" class="oe_highlight"/>
              <button name="create_portal_user"  string="Create Portal User" type="object" class="oe_highlight" />
             </header>
                 <sheet>
@@ -49,19 +49,19 @@
                             <field name="age_category"/>
                         </group>
                     </group>
-                    
+
                     <group>
                         <group>
                 <field name="phone"/>
-                <field name="mobile"/> 
-                <field name="date_joined"/> 
-                <field name="date_of_birth"/> 
+                <field name="mobile"/>
+                <field name="date_joined"/>
+                <field name="date_of_birth"/>
                 <field name="crm_lead_id"  readonly="1" />
                 <field name="website"/>
                 <field name="user_id"/>
-                         
-                           
-                            
+
+
+
                         </group>
                     </group>
                     <notebook>
@@ -100,7 +100,7 @@
                 <separator/>
                 <group expand="0" string="Group By">
                     <filter string="Age Category" name="group_by_age_category" context="{'group_by': 'age_category'}"/>
-                
+
                 </group>
             </search>
         </field>
@@ -125,7 +125,7 @@
                 <field name="name"/>
                 <field name="email"/>
                 <field name="date_joined"/>
-        
+
                 <templates>
                     <t t-name="kanban-box">
                         <div class="oe_kanban_global_click">

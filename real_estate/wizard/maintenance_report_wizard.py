@@ -864,4 +864,4 @@ class MaintenanceReportWizard(models.TransientModel):
             ],
             'target': 'new',
         }
- 
+

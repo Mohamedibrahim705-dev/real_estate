@@ -12,16 +12,16 @@ class PropertyReportSummary(models.AbstractModel):
         Override to add custom data to report context
         """
         properties = self.env['real_estate.property'].browse(docids)
-        
+
         # Calculate occupancy rate
         total_properties = len(properties)
         occupied = len(properties.filtered(lambda p: not p.available))
         occupancy_rate = (occupied / total_properties * 100) if total_properties > 0 else 0
-        
+
         # Get maintenance costs for last 6 months
         six_months_ago = datetime.now() - timedelta(days=180)
         maintenance_costs = {}
-        
+
         for prop in properties:
             costs = self.env['maintenance.request'].search([
                 ('property_id', '=', prop.id),
@@ -35,7 +35,7 @@ class PropertyReportSummary(models.AbstractModel):
         ])
         for payment in payments:
             payment_totals[payment.property_id.id] += payment.total_amount
-        
+
         return {
             'doc_ids': docids,
             'doc_model': 'real_estate.property',

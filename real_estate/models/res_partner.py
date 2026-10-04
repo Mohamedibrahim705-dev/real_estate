@@ -9,4 +9,4 @@ class ResPartner(models.Model):
         ('commercial', 'Commercial'),
     ], string='Specialization')
 
-    
+

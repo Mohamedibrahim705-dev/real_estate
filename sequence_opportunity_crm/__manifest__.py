@@ -24,7 +24,7 @@
     'version': '17.0.1.0.0',
     'category': 'Sales',
     'summary': 'Sequence number for CRM opportunities',
-    'description': """Module helps to Setup sequence number of 
+    'description': """Module helps to Setup sequence number of
     each crm opportunities""",
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
@@ -35,7 +35,7 @@
         'data/sequence_opportunity_crm_data.xml',
         'views/res_config_settings_views.xml',
         'views/crm_lead_views.xml'
-        
+
     ],
     'images': ['static/description/banner.jpg'],
     'license': 'AGPL-3',

@@ -10,7 +10,7 @@
                 <div style="margin: 0px; padding: 0px;">
                     <p style="margin: 0px; padding: 0px; font-size: 13px;">
                         Dear <t t-out="object.tenant_id.name"/>,<br/><br/>
-                        This is a friendly reminder that your rent payment for <strong><t t-out="object.property_id.name"/></strong> 
+                        This is a friendly reminder that your rent payment for <strong><t t-out="object.property_id.name"/></strong>
                         is due on <strong><t t-out="object.next_payment_date"/></strong>.<br/><br/>
                         Amount Due: <strong><t t-out="object.monthly_rent"/></strong><br/><br/>
                         Please ensure the payment is made by the due date to avoid any late fees.<br/><br/>

@@ -56,7 +56,7 @@
                             <field name="total_amount" readonly="1"/>
                         </group>
                     </group>
-                    
+
 
                     <footer>
                         <field name="notes"/>

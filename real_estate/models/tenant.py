@@ -5,7 +5,7 @@ class Tenant(models.Model):
     _name = 'real_estate.tenant'
     _description = 'Real Estate Tenant'
     _order = 'name asc'
-    
+
     # === CORE FIELDS ===
     name = fields.Char(string='Tenant Name', required=True, index=True)
     user_id = fields.Many2one('res.users', string='Related User', index=True)
@@ -17,7 +17,7 @@ class Tenant(models.Model):
     date_joined = fields.Date(string='Date Joined', default=fields.Date.today, readonly=True)
     date_of_birth = fields.Date(string='Date of Birth')
     notes = fields.Text(string='Notes')
-    active = fields.Boolean(string='Active', default=True) 
+    active = fields.Boolean(string='Active', default=True)
     crm_lead_id = fields.Many2one('crm.lead', string='CRM Lead', ondelete='set null', index=True)
     website = fields.Char(string='Website')
     age_category = fields.Selection([
@@ -41,20 +41,20 @@ class Tenant(models.Model):
                 record.write({'notes' : record.crm_lead_id.name})
     def update_Crm_Lead_website(self):
             for record in self:
-                record.write({'notes' : record.crm_lead_id.website}) 
+                record.write({'notes' : record.crm_lead_id.website})
     def crm_change_to_email(self):
                 for record in self:
                     if record.crm_lead_id.website:
                         record.write({'notes' : record.crm_lead_id.email_from})
                     else:
-                        record.write({'notes' : record.website}) 
+                        record.write({'notes' : record.website})
 
     @api.constrains('date_of_birth')
     def _check_date_of_birth(self):
         """Ensure date of birth is not in the future"""
         for record in self:
             if record.date_of_birth and record.date_of_birth > fields.Date.today():
-                raise UserError("Date of birth cannot be in the future.")                            
+                raise UserError("Date of birth cannot be in the future.")
 
 
     def create_portal_user(self):
@@ -69,6 +69,6 @@ class Tenant(models.Model):
                     'groups_id': [(6, 0, [self.env.ref('base.group_portal').id])],
                 })
                 #  # Link user to tenant
-                record.user_id = new_user.id     
+                record.user_id = new_user.id
             else:
                 raise UserError("This tenant already has a portal user.")

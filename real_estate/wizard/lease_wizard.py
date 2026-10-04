@@ -4,7 +4,7 @@ from odoo import api, fields, models
 class LeaseWizard(models.TransientModel):
     _name = 'real_estate.lease.wizard'
     _description = 'Create Lease Wizard'
-    
+
 
     name = fields.Char(string='Lease Name', required=True)
     property_id = fields.Many2one(

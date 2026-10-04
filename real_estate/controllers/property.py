@@ -3,8 +3,8 @@ from odoo.http import request
 
 
 class PropertyController(http.Controller):
-    
-    
+
+
 
     @http.route(
         '/properties',
@@ -24,9 +24,9 @@ class PropertyController(http.Controller):
                 'properties': properties,
             }
         )
-        
-        
-        
+
+
+
     @http.route(
     '/property/<int:property_id>',
     type='http',
